@@ -5,6 +5,22 @@ on:
   #schedule:
     #- cron: "0 0 * * *"
   workflow_dispatch:
+    inputs:
+      sendEmail:
+        description: 'Send to email'
+        required: false
+        default: false
+        type: boolean
+      uploadArtifact:
+        description: 'Upload to artifact'
+        required: false
+        default: false
+        type: boolean
+      uploadPixeldrain:
+        description: 'Upload to pixeldrain'
+        required: false
+        default: true
+        type: boolean
 
 jobs:
   main:
@@ -35,12 +51,14 @@ jobs:
           python main.py
           git add downloaded.txt
       - name: upload-artifact
+        if: github.event.inputs.uploadArtifact == 'true'
         uses: actions/upload-artifact@v3.1.0
         with:
           name: pica-comics
           path: comics/
           retention-days: 90
       - name: send email
+        if: github.event.inputs.sendEmail == 'true'
         env:
           EMAIL_ACCOUNT: ${{secrets.EMAIL_ACCOUNT}}
           EMAIL_AUTH_CODE: ${{secrets.EMAIL_AUTH_CODE}}
@@ -55,6 +73,17 @@ jobs:
         run: |
           # python sendEmail.py
           echo '如果不需要邮件推送的功能,可以将上一行代码注释掉     首次运行时也建议注释,排行榜上的漫画都没推送过,邮箱接受不了大量的漫画,等首次运行结束后再开启'
+      - name: Upload firmware to pixeldrain
+        id: pixeldrain
+        if: github.event.inputs.uploadPixeldrain == 'true'
+        run: |
+          tar -czvf pica_comics.tar.gz comics/
+          curl -T "pica_comics.tar.gz" https://pixeldrain.com/api/file/ > pixeldrain_output.json
+      - name: Get download link from pixeldrain
+        if: steps.pixeldrain.outputs.returncode == '0'
+        run: |
+          $id = Get-Content pixeldrain_output.json | ConvertFrom-Json | Select-Object -ExpandProperty id
+          Write-Output "Download link: https://pixeldrain.com/u/$id"
       - name: commit & push
         uses: actions-go/push@master
         with:
