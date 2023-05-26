@@ -57,8 +57,8 @@ p = Pica()
 p.login()
 p.punch_in()
 
-# 排行榜/收藏夹的漫画
-comics = filter_comics(p.leaderboard()) + p.my_favourite()
+# 收藏夹的漫画
+comics = p.my_favourite()
 
 # 关键词订阅的漫画
 keywords = os.environ["SUBSCRIBE_KEYWORD"].split(',')
