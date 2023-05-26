@@ -59,6 +59,7 @@ p.punch_in()
 
 # 收藏夹的漫画
 comics = p.my_favourite()
+print('收藏了%d本漫画' % (len(comics)))
 
 # 关键词订阅的漫画
 keywords = os.environ["SUBSCRIBE_KEYWORD"].split(',')
