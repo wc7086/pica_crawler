@@ -71,9 +71,6 @@ print('id | 本子 | 画师 | 分区')
 for index in range(len(comics)):
     try:
         download_comic(comics[index])
-        info = p.comic_info(comics[index]['_id'])
-        if info["data"]['comic']['isFavourite']:
-            p.favourite(comics[index]["_id"])
     except KeyError:
         print('download failed,' + str(index))
         continue
